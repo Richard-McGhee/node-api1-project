@@ -13,11 +13,19 @@ let users = [
 ]
 
 server.get("/", (req, res) => {
-    res.status(200).json({ hello: "Server is Running" })
+    if(req){
+        res.status(200).json({ hello: "Server is Running" })
+    } else{
+        res.status(500).json({ errorMessage: "The Server is Having Issues" })
+    }
 })
 
 server.get("/api/users", (req, res) => {
-    res.status(200).json({ data: users })
+    if(users){
+        res.status(200).json({ data: users })
+    } else{
+        res.status(500).json({ errorMessage: "The users information could not be retrieved." })
+    }
 })
 
 server.post("/api/users", (req, res) => {
@@ -60,6 +68,23 @@ server.delete("/api/users/:id", (req, res) => {
         res.status(204).end()
     } else{
         res.status(500).json({ errorMessage: "The user could not be removed" })
+    }
+})
+
+server.put("/api/users/:id", (req, res) => {
+    const { name, bio } = req.body
+    const id = req.params.id
+
+    const currentUser = users.find(user => user.id === id)
+    if(!currentUser){
+        res.status(404).json({ message: "The user with the specified ID does not exist." })
+    } else if(!name || !bio){
+        res.status(400).json({ errorMessage: "Please provide name and bio for the user." })
+    } else if(currentUser && name && bio){
+        Object.assign(currentUser, { name, bio })
+        res.status(200).json({ data: currentUser })
+    } else{
+        res.status(500).json({ errorMessage: "The user information could not be modified." })
     }
 })
 
