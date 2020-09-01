@@ -4,7 +4,7 @@ const shortid = require("shortid")
 const server = express()
 server.use(express.json())
 
-const users = [
+let users = [
     {
         id: shortid.generate(),
         name: "Jane Doe",
@@ -33,6 +33,33 @@ server.post("/api/users", (req, res) => {
         res.status(201).json({ data: users })
     } else{
         res.status(500).json({ errorMessage: "There was an error while saving the user to the database" })
+    }
+})
+
+server.get("/api/users/:id", (req, res) => {
+    const id = req.params.id
+
+    const currentUser = users.find(user => user.id === id)
+    if(currentUser){
+        res.status(200).json({ data: currentUser})
+    } else if (!currentUser){
+        res.status(404).json({ message: "The user with the specified ID does not exist." })
+    } else{
+        res.status(500).json({ errorMessage: "The user information could not be retrieved." })
+    }
+})
+
+server.delete("/api/users/:id", (req, res) => {
+    const id = req.params.id
+
+    const currentUser = users.find(user => user.id === id)
+    if(!currentUser){
+        res.status(404).json({ message: "The user with the specified ID does not exist." })
+    } else if(currentUser){
+        users = users.filter(user => user.id !== id)
+        res.status(204).end()
+    } else{
+        res.status(500).json({ errorMessage: "The user could not be removed" })
     }
 })
 
